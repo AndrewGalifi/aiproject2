@@ -34,5 +34,7 @@ def GraphGenerator():
 
     shortest_paths = dict(nx.all_pairs_shortest_path(g))
     observed_node = random.randint(1, 40)
+    # This initializes and even distrubution to start
+    probabilities = {node: 1/len(g) for node in g}
 
-    return g, agent, target, shortest_paths, observed_node
+    return g, agent, target, shortest_paths, observed_node, probabilities
