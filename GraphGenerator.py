@@ -33,5 +33,6 @@ def GraphGenerator():
     # plt.savefig("graph.png")
 
     shortest_paths = dict(nx.all_pairs_shortest_path(g))
+    observed_node = random.randint(1, 40)
 
-    return g, agent, target, shortest_paths
+    return g, agent, target, shortest_paths, observed_node
