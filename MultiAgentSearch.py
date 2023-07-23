@@ -28,6 +28,12 @@ def main(agent_selected):
                 agent = observed_node
             case 4:
                 agent = agentFourModel(agent, target, g, probabilities, target_movement_range)
+            case 5:
+                pass
+            case 6:
+                agent = agentSixModel(agent, target, g, probabilities, target_movement_range, shortest_paths)
+            case 7:
+                pass
 
         step += 1
         if agent == target:
@@ -47,6 +53,11 @@ def agentOneModel(agent, target, sp):
     return agent_path[1]
 
 
+# TODO
+def AgentTwoModel():
+    pass
+
+
 def agentFourModel(agent, target, g, probabilities, target_movement_range):
     node_to_observe = getMostLikelyNode(probabilities)
 
@@ -61,6 +72,39 @@ def agentFourModel(agent, target, g, probabilities, target_movement_range):
         propagateProbabilities(probabilities, g, target_movement_range)
 
     return agent
+
+
+# TODO
+def agentFiveModel():
+    pass
+
+
+def agentSixModel(agent, target, g, probabilities, target_movement_range, sp):
+    node_to_observe = getMostLikelyNode(probabilities)
+
+    if target_movement_range < 40:
+        target_movement_range += 1
+
+    if node_to_observe == target:
+        return target
+
+    if node_to_observe != target:
+        updateProbabilities(probabilities, node_to_observe, g, target_movement_range)
+        propagateProbabilities(probabilities, g, target_movement_range)
+
+    node_to_observe = getMostLikelyNode(probabilities)
+    agent_path = sp[agent][node_to_observe]
+
+    if len(agent_path) == 1:
+        return agent_path[0]
+    return agent_path[1]
+
+
+# TODO
+# same as agent six, but instead of random choice of most likely node, choose the one of shortest path (agent -->
+# most likely)?
+def agentSevenModel():
+    pass
 
 
 # This sets the checked nodes probability to 0 and spreads out its old probability to the rest of the nodes in range
@@ -115,8 +159,9 @@ def getNodesInRange(g, start_node, range_limit):
 
 
 steps = []
-for i in range(0, 5):
-    for _ in range(1, 51):
-        steps.append(main(i))
-    print(f"Average steps of Agent{i}: " + str(round(sum(steps) / 50)))
-    steps = []
+for i in range(0, 7):
+    if i != 5 and i != 2 and i != 7:  # for testing certain agents
+        for _ in range(1, 501):
+            steps.append(main(i))
+        print(f"Average steps of Agent{i}: " + str(round(sum(steps) / 500)))
+        steps = []
