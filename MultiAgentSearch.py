@@ -1,6 +1,7 @@
 import random
 from GraphGenerator import GraphGenerator
 from collections import deque
+import time
 
 
 def main(agent_selected):
@@ -159,9 +160,16 @@ def getNodesInRange(g, start_node, range_limit):
 
 
 steps = []
+times = []
 for i in range(0, 7):
     if i != 5 and i != 2 and i != 7:  # for testing certain agents
         for _ in range(1, 501):
+            startTime = time.time()
             steps.append(main(i))
+            endTime = time.time()
+            times.append(endTime - startTime)
         print(f"Average steps of Agent{i}: " + str(round(sum(steps) / 500)))
+        avgTime = sum(times)/500
+        print(f"Average Time of Agent {i}: " + str(avgTime))
         steps = []
+        times = []
