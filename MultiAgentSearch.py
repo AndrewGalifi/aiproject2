@@ -31,7 +31,7 @@ def main(agent_selected):
             case 5:
                 agent, probabilities = agentFiveModel(agent, target, g, probabilities, target_movement_range)
             case 6:
-                agent = agentSixModel(agent, target, g, probabilities, target_movement_range, shortest_paths)
+                agent, probabilities = agentSixModel(agent, target, g, probabilities, target_movement_range, shortest_paths)
             case 7:
                 pass
 
@@ -118,28 +118,20 @@ def agentFiveModel(agent, target, g, probabilities, target_movement_range):
 def agentSixModel(agent, target, g, probabilities, target_movement_range, sp):
     node_to_observe = getMostLikelyNode(probabilities)
 
-    target_movement_range[0] = 1
-
     if node_to_observe == target:
-        return target
+        return target, probabilities
 
     if node_to_observe != target:
-
-        spreading_probability = probabilities[target] / target_movement_range[0]
-
-        nodes_in_range = getNodesInRange(g, target, target_movement_range[0])
-        for node in nodes_in_range:
-            probabilities[node] += spreading_probability
-
-        probabilities[target] = 0
+        updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
         propagateProbabilities(probabilities, g, target_movement_range[0])
 
     node_to_observe = getMostLikelyNode(probabilities)
+
     agent_path = sp[agent][node_to_observe]
 
     if len(agent_path) == 1:
-        return agent_path[0]
-    return agent_path[1]
+        return agent_path[0], probabilities
+    return agent_path[1], probabilities
 
 
 # TODO
@@ -212,8 +204,8 @@ for i in range(0, 7):
             steps.append(main(i))
             endTime = time.time()
             times.append(endTime - startTime)
-        print(f"Average steps of Agent{i}: " + str(round(sum(steps) / 500)))
+        print(f"Average steps of Agent {i}: " + str(round(sum(steps) / 500)))
         avgTime = sum(times) / 500
-        print(f"Average Time of Agent {i}: " + str(round(avgTime, 5)) + "\n")
+        print(f"Average time of Agent  {i}: " + str(round(avgTime, 5)) + "\n")
         steps = []
         times = []
