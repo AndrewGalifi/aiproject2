@@ -104,8 +104,7 @@ def agentFiveModel(agent, target, g, probabilities,  target_movement_range):
 def agentSixModel(agent, target, g, probabilities, target_movement_range, sp):
     node_to_observe = getMostLikelyNode(probabilities)
 
-    if target_movement_range[0] < 40:
-        target_movement_range[0] += 1
+    target_movement_range[0] = 1
 
     if node_to_observe == target:
         return target
