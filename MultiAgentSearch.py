@@ -4,10 +4,10 @@ from GraphGenerator import GraphGenerator
 from collections import deque
 import time
 
-
 def main(agent_selected):
     g, agent, target, shortest_paths, observed_node, probabilities = GraphGenerator()
-    target_movement_range = 1
+
+    target_movement_range = [1]
 
     # step is the number of target steps, not necessarily agent steps (agent may not move when target steps into agent)
     step = 0
@@ -26,9 +26,9 @@ def main(agent_selected):
             case 3:
                 agent = observed_node
             case 4:
-                agent = agentFourModel(agent, target, g, probabilities, target_movement_range)
+                agent, probabilities = agentFourModel(agent, target, g, probabilities, target_movement_range)
             case 5:
-                pass
+                agent, probabilities = agentFiveModel(agent, target, g, probabilities, target_movement_range)
             case 6:
                 agent = agentSixModel(agent, target, g, probabilities, target_movement_range, shortest_paths)
             case 7:
@@ -63,37 +63,63 @@ def agentTwoModel(agent, target, g):
 def agentFourModel(agent, target, g, probabilities, target_movement_range):
     node_to_observe = getMostLikelyNode(probabilities)
 
-    if target_movement_range < 40:
-        target_movement_range += 1
-
     if node_to_observe == target:
-        return target
+        return target, probabilities
 
     if node_to_observe != target:
-        updateProbabilities(probabilities, node_to_observe, g, target_movement_range)
-        propagateProbabilities(probabilities, g, target_movement_range)
+        updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
+        propagateProbabilities(probabilities, g, target_movement_range[0])
 
-    return agent
+    return agent, probabilities
 
 
 # TODO
 # less num of examinations (compare # of examinations between a4 / reduce ways of updating probability
-def agentFiveModel():
-    pass
+def agentFiveModel(agent, target, g, probabilities,  target_movement_range):
+    node_to_observe = getMostLikelyNode(probabilities)
+
+    if node_to_observe == target:
+        return target, probabilities
+
+    if node_to_observe != target:
+        target_movement_range[0] = 1
+
+        spreading_probability = probabilities[target] / target_movement_range[0]
+
+        nodes_in_range = getNodesInRange(g, target, target_movement_range[0])
+        for node in nodes_in_range:
+            probabilities[node] += spreading_probability
+
+        probabilities[target] = 0
+    
+        propagateProbabilities(probabilities, g, target_movement_range[0])
+
+    #if node_to_observe != target:
+    #    updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
+    #    propagateProbabilities(probabilities, g, target_movement_range[0])
+
+    return agent, probabilities
 
 
 def agentSixModel(agent, target, g, probabilities, target_movement_range, sp):
     node_to_observe = getMostLikelyNode(probabilities)
 
-    if target_movement_range < 40:
-        target_movement_range += 1
+    if target_movement_range[0] < 40:
+        target_movement_range[0] += 1
 
     if node_to_observe == target:
         return target
 
     if node_to_observe != target:
-        updateProbabilities(probabilities, node_to_observe, g, target_movement_range)
-        propagateProbabilities(probabilities, g, target_movement_range)
+        
+        spreading_probability = probabilities[target] / target_movement_range[0]
+
+        nodes_in_range = getNodesInRange(g, target, target_movement_range[0])
+        for node in nodes_in_range:
+            probabilities[node] += spreading_probability
+
+        probabilities[target] = 0
+        propagateProbabilities(probabilities, g, target_movement_range[0])
 
     node_to_observe = getMostLikelyNode(probabilities)
     agent_path = sp[agent][node_to_observe]
@@ -165,8 +191,9 @@ def getNodesInRange(g, start_node, range_limit):
 
 steps = []
 times = []
+target_movement_range = [1]
 for i in range(0, 7):
-    if i != 5 and i != 7:  # for testing certain agents
+    if i != 7:  # for testing certain agents
         for _ in range(1, 501):
             startTime = time.time()
             steps.append(main(i))

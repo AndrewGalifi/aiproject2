@@ -34,4 +34,4 @@ def GraphGenerator():
     # This initializes and even distribution to start
     probabilities = {node: 1 / len(g) for node in g}
 
-    return g, agent, target, shortest_paths, observed_node, probabilities
+    return g, agent, target, shortest_paths, observed_node, probabilities,
