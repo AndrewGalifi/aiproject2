@@ -1,4 +1,5 @@
 import random
+import networkx as nx
 from GraphGenerator import GraphGenerator
 from collections import deque
 import time
@@ -8,10 +9,7 @@ def main(agent_selected):
     g, agent, target, shortest_paths, observed_node, probabilities = GraphGenerator()
     target_movement_range = 1
 
-    # print("Enter agent number (0-4) to simulate:")
-    # agent_selected = int(input())
-
-    # step is number of target steps, not necessarily agent steps (agent may not move when target steps into agent)
+    # step is the number of target steps, not necessarily agent steps (agent may not move when target steps into agent)
     step = 0
     while agent != target:
         neighbors = list(g.neighbors(target))
@@ -24,7 +22,7 @@ def main(agent_selected):
             case 1:
                 agent = agentOneModel(agent, target, shortest_paths)
             case 2:
-                pass
+                agent = agentTwoModel(agent, target, g)
             case 3:
                 agent = observed_node
             case 4:
@@ -38,13 +36,10 @@ def main(agent_selected):
 
         step += 1
         if agent == target:
-            # print(f"S{step}:\nAgent found Target at node {target}")
             return step
-            # break
-
-        # print(f"S{step}: Target is at node {target},\nS{step}: Agent is at node {agent}\n")
 
 
+# bfs
 def agentOneModel(agent, target, sp):
     agent_path = sp[agent][target]
 
@@ -55,8 +50,14 @@ def agentOneModel(agent, target, sp):
 
 
 # TODO
-def AgentTwoModel():
-    pass
+# astar, must beat number of moves
+def agentTwoModel(agent, target, g):
+    agent_path = nx.astar_path(g, agent, target)
+
+    if len(agent_path) == 1:
+        return agent_path[0]
+
+    return agent_path[1]
 
 
 def agentFourModel(agent, target, g, probabilities, target_movement_range):
@@ -76,6 +77,7 @@ def agentFourModel(agent, target, g, probabilities, target_movement_range):
 
 
 # TODO
+# less num of examinations (compare # of examinations between a4 / reduce ways of updating probability
 def agentFiveModel():
     pass
 
@@ -104,6 +106,8 @@ def agentSixModel(agent, target, g, probabilities, target_movement_range, sp):
 # TODO
 # same as agent six, but instead of random choice of most likely node, choose the one of shortest path (agent -->
 # most likely)?
+
+# comb of 5 and 2 (astar etc.)
 def agentSevenModel():
     pass
 
@@ -162,14 +166,14 @@ def getNodesInRange(g, start_node, range_limit):
 steps = []
 times = []
 for i in range(0, 7):
-    if i != 5 and i != 2 and i != 7:  # for testing certain agents
+    if i != 5 and i != 7:  # for testing certain agents
         for _ in range(1, 501):
             startTime = time.time()
             steps.append(main(i))
             endTime = time.time()
             times.append(endTime - startTime)
         print(f"Average steps of Agent{i}: " + str(round(sum(steps) / 500)))
-        avgTime = sum(times)/500
-        print(f"Average Time of Agent {i}: " + str(avgTime))
+        avgTime = sum(times) / 500
+        print(f"Average Time of Agent {i}: " + str(round(avgTime, 5)) + "\n")
         steps = []
         times = []
