@@ -18,7 +18,7 @@ def GraphGenerator():
         u = random.randint(1, 40)
         v = random.randint(1, 40)
 
-        if u != v and not g.has_edge(u, v):
+        if (u != v and not g.has_edge(u, v)) and (g.degree[u] < 3 and g.degree[v] < 3):
             g.add_edge(u, v)
             # print(f"Added edge: ({u}, {v})")
             num_edges_added += 1
@@ -28,9 +28,6 @@ def GraphGenerator():
     agent = random.randint(1, 40)
     while agent == target:
         agent = random.randint(1, 40)
-
-    # nx.draw(g, with_labels=True)
-    # plt.savefig("graph.png")
 
     shortest_paths = dict(nx.all_pairs_shortest_path(g))
     observed_node = random.randint(1, 40)
