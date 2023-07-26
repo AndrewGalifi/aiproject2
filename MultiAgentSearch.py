@@ -3,6 +3,7 @@ import networkx as nx
 from GraphGenerator import GraphGenerator
 from collections import deque
 import time
+import heapq
 
 
 def main(agent_selected):
@@ -29,7 +30,7 @@ def main(agent_selected):
             case 4:
                 agent, probabilities = agentFourModel(agent, target, g, probabilities, target_movement_range)
             case 5:
-                agent, probabilities = agentFiveModel(agent, target, g, probabilities, target_movement_range)
+                agent, probabilities = agentFiveModelV2(agent, target, g, probabilities, target_movement_range)
             case 6:
                 agent, probabilities = agentSixModel(agent, target, g, probabilities, target_movement_range, shortest_paths)
             case 7:
@@ -82,7 +83,7 @@ def agentFourModel(agent, target, g, probabilities, target_movement_range):
 
     if node_to_observe != target:
         updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
-        propagateProbabilities(probabilities, g, target_movement_range[0])
+        probabilities = propagateProbabilities(probabilities, g, target_movement_range[0])
 
     return agent, probabilities
 
@@ -100,17 +101,30 @@ def agentFiveModel(agent, target, g, probabilities, target_movement_range):
 
         spreading_probability = probabilities[target] / target_movement_range[0]
 
-        nodes_in_range = getNodesInRange(g, target, target_movement_range[0])
+        nodes_in_range = getNodesInRange(g, node_to_observe, target_movement_range[0])
         for node in nodes_in_range:
             probabilities[node] += spreading_probability
 
         probabilities[target] = 0
 
-        propagateProbabilities(probabilities, g, target_movement_range[0])
+        probabilities = propagateProbabilities(probabilities, g, target_movement_range[0])
 
     # if node_to_observe != target:
     #    updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
     #    propagateProbabilities(probabilities, g, target_movement_range[0])
+
+    return agent, probabilities
+
+def agentFiveModelV2(agent, target, g, probabilities, target_movement_range):
+
+    node_to_observe = getMostLikelyNode(probabilities)
+
+    if node_to_observe == target:
+        return target, probabilities
+
+    if node_to_observe != target:
+        updateProbabilities(probabilities, node_to_observe, g, target_movement_range[0])
+        probabilities = propagateProbabilities(probabilities, g, target_movement_range[0])
 
     return agent, probabilities
 
