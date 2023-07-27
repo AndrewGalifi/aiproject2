@@ -10,9 +10,6 @@ def main(agent_selected):
 
     target_movement_range = [1]
 
-    # print("INIT: Agent is at: " + str(agent))
-    # print("INIT: Target is at: " + str(target))
-
     step = 0
     examinations = 0
     while agent != target:
@@ -40,8 +37,7 @@ def main(agent_selected):
                 agent, probabilities, e, no_step = agentSixModel(agent, target, g, probabilities, target_movement_range)
                 examinations += e
             case 7:
-                # agent, probabilities, e, no_step = agentSevenModel(agent, target, g, probabilities,
-                #                                                  target_movement_range, shortest_paths)
+                agent, probabilities, e, no_step = agentSevenModel(agent, target, g, probabilities, shortest_paths)
                 examinations += e
 
         if no_step:
@@ -158,7 +154,6 @@ def agentFiveModel(target, g, probabilities):
 
 
 def agentSixModel(agent, target, g, probabilities, target_movement_range):
-    # first examination
     if agent == target:
         no_step = True
         return agent, probabilities, 0, no_step
@@ -206,18 +201,82 @@ def agentSixModel(agent, target, g, probabilities, target_movement_range):
     return agent_path[1], probabilities, examinations, no_step
 
 
+# comb of 5 and 2 (astar and optimized probability)
 
-# TODO
-# same as agent six, but instead of random choice of most likely node, choose the one of shortest path (agent -->
-# most likely)?
+def agentSevenModel(agent, target, g, probabilities, sp):
+    def distance(a, t):
+        return len(sp[a][t]) - 1
 
-# comb of 5 and 2 (astar etc.)
-'''
-def agentSevenModel():
-    # astar
-    agent_path = nx.astar_path(g, agent, node_to_observe)
-    examinations = len(agent_path)
-'''
+    if agent == target:
+        no_step = True
+        return agent, probabilities, 0, no_step
+
+    probabilities[agent] = 0
+    node_to_observe = getMostLikelyNode(probabilities)
+
+    examinations = 1
+    if node_to_observe == target:
+
+        # calculate new probability
+        prob = 1 / len(list(g.neighbors(node_to_observe)))
+        # spread new probability
+        for node in g:
+            if node in list(g.neighbors(node_to_observe)) and node != agent:
+                probabilities[node] = prob
+            probabilities[node] = 0
+
+        node_to_observe = getMostLikelyNode(probabilities)
+        agent_path = nx.astar_path(g, agent, node_to_observe, heuristic=distance)
+
+        no_step = False
+        if len(agent_path) == 1:
+            no_step = True
+            return agent_path[0], probabilities, examinations, no_step
+        # simulate astar visiting nodes of lowest h value
+        examinations += 1
+        return agent_path[1], probabilities, examinations, no_step
+
+    # when node_to_observe does not equal target
+    '''neighbors = list(g.neighbors(node_to_observe))
+    for node in neighbors:
+        examinations += 1
+        if node == target:
+            return node, probabilities, examinations'''
+
+    # update probs
+    probabilities[node_to_observe] = 0
+    for node in list(g.neighbors(node_to_observe)):
+        # discourage checking it again next around
+        probabilities[node] = probabilities[node] / 2
+
+        j = random.choice(list(g.neighbors(node)))
+
+        while j not in g.neighbors(node_to_observe) and j != node_to_observe:
+            j = random.choice(list(g.neighbors(node)))
+
+            for x in g.neighbors(node):
+                if probabilities[x] > j:
+                    j = x
+
+        # promote nodes 2 away to expand to
+        if j not in g.neighbors(node_to_observe) and j != node_to_observe:
+            probabilities[j] = probabilities[j] * 2
+
+    for x in probabilities:
+        if x != .050 and x != 0:
+            probabilities[x] = .025
+
+    node_to_observe = getMostLikelyNode(probabilities)
+    agent_path = nx.astar_path(g, agent, node_to_observe, heuristic=distance)
+
+    no_step = False
+    if len(agent_path) == 1:
+        no_step = True
+        return agent_path[0], probabilities, examinations, no_step
+
+    # simulate astar visiting nodes of lowest h value
+    examinations += 1
+    return agent_path[1], probabilities, examinations, no_step
 
 
 # This sets the checked nodes probability to 0 and spreads out its old probability to the rest of the nodes in range
@@ -277,7 +336,7 @@ times = []
 target_movement_range = [1]
 c = ""
 
-for i in range(0, 7):
+for i in range(0, 8):
     if i == 3 or i == 4 or i == 5:  # for testing certain agents
         c = "examinations"
     elif i == 0 or i == 1 or i == 2:
@@ -295,7 +354,7 @@ for i in range(0, 7):
         steps = []
         times = []
 
-    if i == 6:
+    if i == 6 or i == 7:
         for _ in range(1, 501):
             startTime = time.time()
             ex, s = main(i)
