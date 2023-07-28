@@ -4,6 +4,7 @@ from GraphGenerator import GraphGenerator
 from collections import deque
 import time
 
+# Project by Andrew Galifi and Nick Russo
 
 def main(agent_selected):
     g, agent, target, shortest_paths, observed_node, probabilities = GraphGenerator()
