@@ -155,11 +155,11 @@ def agentFiveModel(target, g, probabilities):
 
 
 def agentSixModel(agent, target, g, probabilities, target_movement_range):
-    if agent == target:
+    '''if agent == target:
         no_step = True
         return agent, probabilities, 0, no_step
+    probabilities[agent] = 0'''
 
-    probabilities[agent] = 0
     node_to_observe = getMostLikelyNode(probabilities)
 
     examinations = 1
